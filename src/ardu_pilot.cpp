@@ -120,6 +120,13 @@ ardu_pilot::run(){
 
                 }
 
+                case MAVLINK_MSG_ID_RAW_PRESSURE:
+                {
+                    mavlink_raw_pressure_t baro;
+
+
+                }
+
                 case MAVLINK_MSG_ID_COMMAND_LONG:
                 // EXECUTE ACTION
                 break;

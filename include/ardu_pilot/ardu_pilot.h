@@ -9,6 +9,8 @@
 #include "mavlink/v1.0/ardupilotmega/mavlink.h"
 #include "sensor_msgs/Imu.h"
 #include "sensor_msgs/NavSatFix.h"
+
+
 #include "ros/ros.h"
 
 using namespace serial;
@@ -104,6 +106,8 @@ public:
     sensor_msgs::NavSatStatus ros_gps_fix_msg;
     geometry_msgs::Vector3 ros_ahrs_msg;
     geometry_msgs::Vector3 ros_att_msg;
+
+
 
     void getROSParameters();
     void configureROSComms();
