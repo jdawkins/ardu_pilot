@@ -20,7 +20,7 @@ find_package(catkin REQUIRED COMPONENTS roscpp serial std_msgs sensor_msgs messa
 
 ## Generate messages in the 'msg' folder
  add_message_files(
-#   FILES
+    FILES
     command.msg
     Mavlink.msg
 #   Message1.msg
@@ -36,7 +36,7 @@ find_package(catkin REQUIRED COMPONENTS roscpp serial std_msgs sensor_msgs messa
 
 ## Generate added messages and services with any dependencies listed here
  generate_messages(
-#   DEPENDENCIES
+   DEPENDENCIES
    std_msgs
  )
 
@@ -79,13 +79,19 @@ set(ardu_pilot_SRCS
 
 
 ## Declare a cpp executable
+# add_executable(ardu_pilot_node src/ardu_pilot_node.cpp)
+# add_executable(ardu_pilot_listener src/ardu_pilot_listener.cpp)
+
  add_executable(ardu_pilot_node src/ardu_pilot_node.cpp src/ardu_pilot.cpp)
+ add_executable(ardu_pilot_listener src/ardu_pilot_listener.cpp src/ardu_pilot.cpp)
 
 ## Add dependencies to the executable
  add_dependencies(ardu_pilot_node ${PROJECT_NAME})
+ add_dependencies(ardu_pilot_listener ${PROJECT_NAME})
 
 ## Specify libraries to link a library or executable target against
  target_link_libraries(ardu_pilot_node ${catkin_LIBRARIES})
+ target_link_libraries(ardu_pilot_listener ${catkin_LIBRARIES})
 
 
 #############

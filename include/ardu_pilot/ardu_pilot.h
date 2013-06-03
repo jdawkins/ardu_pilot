@@ -9,6 +9,7 @@
 #include "mavlink/v1.0/ardupilotmega/mavlink.h"
 #include "sensor_msgs/Imu.h"
 #include "sensor_msgs/NavSatFix.h"
+#include "mavlink_msgs/Mavlink.h"
 
 
 #include "ros/ros.h"
@@ -17,10 +18,11 @@ using namespace serial;
 using namespace std;
 using namespace boost;
 using namespace ros;
+using namespace mav_msgs;
 
 
 // MAVLINK MESSAGE ID 24
-struct gps_data{
+/*struct gps_data{
 
     uint64_t time;      //micro seconds from epoch
     uint8_t fix_type;   //0-1: no fix, 2: 2D fix, 3: 3D fix.
@@ -89,7 +91,7 @@ struct barometer{
     float pressure_rel;
     int16_t temperature;
 
-};
+};*/
 
 class ardu_pilot {
 
@@ -99,6 +101,7 @@ public:
 
     void connect();
     void run();
+    void readData();
 
 
     sensor_msgs::Imu ros_imu_msg;
@@ -109,14 +112,17 @@ public:
 
 
 
+
+
     void getROSParameters();
     void configureROSComms();
-
+    void receiverCallBack(const Mavlink &mav_msg);
    // ~ardu_pilot();
 private:
 
-    void readData();
+
     void parseData();
+
 
     string port_;
     int baud_;
@@ -125,11 +131,14 @@ private:
 
     mavlink_status_t last_status;
 
+
     ros::NodeHandle n;
     ros::Publisher imu_pub;
     ros::Publisher gps_pub;
     ros::Publisher ahrs_pub;
     ros::Publisher att_pub;
+    ros::Publisher mav_pub;
+    ros::Subscriber mav_sub;
 
 };
 
