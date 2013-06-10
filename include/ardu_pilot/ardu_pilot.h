@@ -2,6 +2,7 @@
 #define ARDU_PILOT_H
 
 #define MAX_BUFFER_SIZE 100
+#define BUFFER_LENGTH ((MAVLINK_MAX_PAYLOAD_LEN+MAVLINK_NUM_CHECKSUM_BYTES+7)/8) //33 byte 5 header 28 message
 
 #include "serial/serial.h"
 #include <string.h>
@@ -97,6 +98,7 @@ class ardu_pilot {
 
 public:
     ardu_pilot();
+    ardu_pilot(NodeHandle nh);
     ardu_pilot(const string port, uint32_t baud);
 
     void connect();
@@ -139,6 +141,11 @@ private:
     ros::Publisher att_pub;
     ros::Publisher mav_pub;
     ros::Subscriber mav_sub;
+
+    bool log_imu_flag;
+    bool log_gps_flag;
+    bool log_ahrs_flag;
+    bool log_att_flag;
 
 };
 

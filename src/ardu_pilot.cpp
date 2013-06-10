@@ -15,7 +15,7 @@ static inline void createMavlinkFromROS(const Mavlink *mavlink_ros_msg, mavlink_
     msg->compid = mavlink_ros_msg->compid;
     msg->msgid = mavlink_ros_msg->msgid;
 
-    for(int i = 0;i<((MAVLINK_MAX_PAYLOAD_LEN+MAVLINK_NUM_CHECKSUM_BYTES+7)/8);i++){
+    for(int i = 0;i<BUFFER_LENGTH;i++){
         msg->payload64[i] = mavlink_ros_msg->payload[i];
 
     }
@@ -35,7 +35,7 @@ static inline void createROSFromMavlink(const mavlink_message_t* mavlink_msg, Ma
     mavlink_ros_msg->compid = mavlink_msg->compid;
     mavlink_ros_msg->msgid = mavlink_msg->msgid;
 
-    for (int i = 0; i < ((MAVLINK_MAX_PAYLOAD_LEN+MAVLINK_NUM_CHECKSUM_BYTES+7)/8); i++){
+    for (int i = 0; i < BUFFER_LENGTH; i++){
 
        (mavlink_ros_msg->payload).push_back(mavlink_msg->payload64[i]);
     }
@@ -43,12 +43,33 @@ static inline void createROSFromMavlink(const mavlink_message_t* mavlink_msg, Ma
 }
 
 ardu_pilot::ardu_pilot(){
+    log_imu_flag = false;
+    log_gps_flag = false;
+    log_ahrs_flag = false;
+    log_att_flag = false;
 
     getROSParameters();
+    configureROSComms();
+}
+
+ardu_pilot::ardu_pilot(NodeHandle nh){
+    n = nh;
+
+    log_imu_flag = false;
+    log_gps_flag = false;
+    log_ahrs_flag = false;
+    log_att_flag = false;
+    getROSParameters();
+    configureROSComms();
 
 }
 
 ardu_pilot::ardu_pilot(const string port, uint32_t baud){
+
+    log_imu_flag = false;
+    log_gps_flag = false;
+    log_ahrs_flag = false;
+    log_att_flag = false;
 
     my_serial.setPort(port);
     my_serial.setBaudrate(baud);
@@ -74,20 +95,24 @@ ardu_pilot::connect(){
 
         cout<<"Ardu_Pilot Connected on Port: "<<my_serial.getPort()<<" at Baudrate: "<<my_serial.getBaudrate()<<endl;
     }
+    else{
+
+        ROS_ERROR("Serial Port was Unable to Open, check port settings");
+    }
 
     getROSParameters();
-    configureROSComms();
+
 
 }
 
 void
 ardu_pilot::configureROSComms(){
 
-    mav_pub = n.advertise<Mavlink>("mav_data",1000);
-  //  gps_pub = n.advertise<sensor_msgs::NavSatFix>("gps_data",100);
-   // imu_pub = n.advertise<sensor_msgs::Imu>("imu_data",100);
-   // ahrs_pub = n.advertise<geometry_msgs::Vector3>("ahrs_data",100);
-   // att_pub = n.advertise<geometry_msgs::Vector3>("att_data",100);
+    mav_pub = n.advertise<Mavlink>("/mav_data",1000);
+    gps_pub = n.advertise<sensor_msgs::NavSatFix>("/gps_data",1000);
+    imu_pub = n.advertise<sensor_msgs::Imu>("/imu_data",1000);
+    ahrs_pub = n.advertise<geometry_msgs::Vector3>("/ahrs_data",1000);
+    att_pub = n.advertise<geometry_msgs::Vector3>("/att_data",1000);
 
     mav_sub = n.subscribe("/mav_qgc",1000,&ardu_pilot::receiverCallBack,this);
 
@@ -96,8 +121,36 @@ ardu_pilot::configureROSComms(){
 void
 ardu_pilot::getROSParameters(){
 
-    n.param<std::string>("port", port_, "/dev/ttyACM0");
-    n.param<int>("baudrate", baud_, 115200);
+    n.getParam("log_imu",log_imu_flag);
+    n.getParam("log_gps",log_gps_flag);
+    n.getParam("log_att",log_att_flag);
+    n.getParam("log_ahrs",log_ahrs_flag);
+
+    ROS_INFO("log imu stats: %d\n",log_imu_flag);
+    if(n.getParam("port",port_)){
+        ROS_INFO("Got Param: %s",port_.c_str());
+    }
+    else{
+
+        port_ = "/dev/ttyACM0";
+        ROS_WARN("Failed to get Serial Port from Launch File, defaulting to %s \n",port_.c_str());
+
+    }
+
+    if(n.getParam("baud",baud_)){
+
+     ROS_INFO("Got Param: %d",baud_);
+
+    }
+    else{
+        baud_ = 115200;
+        ROS_WARN("Failed to get Serial Baudrate from Launch File, defaulting to %d \n",baud_);
+
+    }
+
+    my_serial.setPort(port_.c_str());
+    my_serial.setBaudrate(baud_);
+
 }
 
 void
@@ -141,6 +194,7 @@ ardu_pilot::readData(){
                         break;
                         case MAVLINK_MSG_ID_RAW_IMU:
                         {
+                            if(log_imu_flag){
                             mavlink_raw_imu_t imu;
                             mavlink_msg_raw_imu_decode(&msg,&imu);
 
@@ -153,22 +207,26 @@ ardu_pilot::readData(){
                             ros_imu_msg.angular_velocity.z = imu.zgyro/1000;
 
 
-                        //    imu_pub.publish(ros_imu_msg);
+                            imu_pub.publish(ros_imu_msg);
+                            }
                         }
                         case MAVLINK_MSG_ID_GPS_RAW_INT:
                         {
-                            mavlink_gps_raw_int_t gps;
-                            mavlink_msg_gps_raw_int_decode(&msg,&gps);
+                            if(log_gps_flag){
+                                mavlink_gps_raw_int_t gps;
+                                mavlink_msg_gps_raw_int_decode(&msg,&gps);
 
-                            ros_gps_msg.latitude = gps.lat/1E7;
-                            ros_gps_msg.longitude = gps.lon/1E7;
-                            ros_gps_msg.altitude = gps.alt/1E3;
+                                ros_gps_msg.latitude = gps.lat/1E7;
+                                ros_gps_msg.longitude = gps.lon/1E7;
+                                ros_gps_msg.altitude = gps.alt/1E3;
 
-                         //   gps_pub.publish(ros_gps_msg);
+                                gps_pub.publish(ros_gps_msg);
+                            }
                         }
 
                         case MAVLINK_MSG_ID_ATTITUDE:
                         {
+                            if(log_att_flag){
                             mavlink_attitude_t att;
 
                             mavlink_msg_attitude_decode(&msg,&att);
@@ -177,7 +235,12 @@ ardu_pilot::readData(){
                             ros_att_msg.y = att.pitch;
                             ros_att_msg.z = att.yaw;
 
-                        //    att_pub.publish(ros_att_msg);
+                            att_pub.publish(ros_att_msg);
+                            }
+                        }
+                        case MAVLINK_MSG_ID_AHRS:
+                        {
+                            mavlink_ahrs_t ahrs;
 
                         }
                         case MAVLINK_MSG_ID_RC_CHANNELS_RAW:
@@ -189,7 +252,6 @@ ardu_pilot::readData(){
                         case MAVLINK_MSG_ID_RAW_PRESSURE:
                         {
                             mavlink_raw_pressure_t baro;
-
 
                         }
 
@@ -210,31 +272,20 @@ ardu_pilot::readData(){
 void
 ardu_pilot::receiverCallBack(const Mavlink &mav_msg){
 
-    uint8_t buf[MAVLINK_MAX_PAYLOAD_LEN + MAVLINK_NUM_NON_PAYLOAD_BYTES];
+    uint8_t buf[BUFFER_LENGTH];
     mavlink_message_t mavlink_msg;
 
     createMavlinkFromROS(&mav_msg, &mavlink_msg);
     mavlink_msg_to_send_buffer(buf,&mavlink_msg);
 
-    printf("Writing Byte Stream: ");
+    /*printf("Writing Byte Stream: ");
     for(int i=0;i<sizeof(buf);i++){
 
         uint8_t temp = buf[i];
         printf("%02x ", (unsigned char)temp);
     }
-    printf("\n");
+    printf("\n");*/
 
     my_serial.write(buf,sizeof(buf));
 
-   /* if (mavlink_msg.msgid == MAVLINK_MSG_ID_ATTITUDE){
-
-                mavlink_attitude_t att;
-
-                mavlink_msg_attitude_decode(&mavlink_msg,&att);
-
-                ros_att_msg.x = att.roll;
-                ros_att_msg.y = att.pitch;
-                ros_att_msg.z = att.yaw;
-                printf("Roll angle is : %f\n\r", att.roll);
-    }*/
 }
