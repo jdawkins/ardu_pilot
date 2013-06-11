@@ -10,8 +10,8 @@
 #include "mavlink/v1.0/ardupilotmega/mavlink.h"
 #include "sensor_msgs/Imu.h"
 #include "sensor_msgs/NavSatFix.h"
-#include "mavlink_msgs/Mavlink.h"
-
+//#include "mavlink_msgs/Mavlink.h"
+#include "ardu_pilot/Mavlink.h"
 
 #include "ros/ros.h"
 
@@ -19,8 +19,8 @@ using namespace serial;
 using namespace std;
 using namespace boost;
 using namespace ros;
-using namespace mav_msgs;
-
+//using namespace mav_msgs;
+using namespace ardu_pilot;
 
 // MAVLINK MESSAGE ID 24
 /*struct gps_data{
@@ -94,23 +94,23 @@ struct barometer{
 
 };*/
 
-class ardu_pilot {
+class ArduPilot {
 
 public:
-    ardu_pilot();
-    ardu_pilot(NodeHandle nh);
-    ardu_pilot(const string port, uint32_t baud);
+    ArduPilot();
+    ArduPilot(NodeHandle nh);
+    ArduPilot(const string port, uint32_t baud);
 
     void connect();
     void run();
     void readData();
 
 
-    sensor_msgs::Imu ros_imu_msg;
-    sensor_msgs::NavSatFix ros_gps_msg;
-    sensor_msgs::NavSatStatus ros_gps_fix_msg;
-    geometry_msgs::Vector3 ros_ahrs_msg;
-    geometry_msgs::Vector3 ros_att_msg;
+    sensor_msgs::Imu ros_imu_msg_;
+    sensor_msgs::NavSatFix ros_gps_msg_;
+    sensor_msgs::NavSatStatus ros_gps_fix_msg_;
+    geometry_msgs::Vector3 ros_ahrs_msg_;
+    geometry_msgs::Vector3 ros_att_msg_;
 
 
 
@@ -128,24 +128,24 @@ private:
 
     string port_;
     int baud_;
-    string data_buffer;
-    Serial my_serial;
+    string data_buffer_;
+    Serial my_serial_;
 
-    mavlink_status_t last_status;
+    mavlink_status_t last_status_;
 
 
-    ros::NodeHandle n;
-    ros::Publisher imu_pub;
-    ros::Publisher gps_pub;
-    ros::Publisher ahrs_pub;
-    ros::Publisher att_pub;
-    ros::Publisher mav_pub;
-    ros::Subscriber mav_sub;
+    ros::NodeHandle n_;
+    ros::Publisher imu_pub_;
+    ros::Publisher gps_pub_;
+    ros::Publisher ahrs_pub_;
+    ros::Publisher att_pub_;
+    ros::Publisher mav_pub_;
+    ros::Subscriber mav_sub_;
 
-    bool log_imu_flag;
-    bool log_gps_flag;
-    bool log_ahrs_flag;
-    bool log_att_flag;
+    bool log_imu_flag_;
+    bool log_gps_flag_;
+    bool log_ahrs_flag_;
+    bool log_att_flag_;
 
 };
 

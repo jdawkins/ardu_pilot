@@ -9,7 +9,7 @@ int main(int argc, char **argv){
 
    // ardu_pilot ardu(port,baud);
     ros::NodeHandle nh = ros::NodeHandle("~");
-    ardu_pilot* ardu = new ardu_pilot(nh);
+    ArduPilot* ardu = new ArduPilot(nh);
 
     ardu->connect();
 

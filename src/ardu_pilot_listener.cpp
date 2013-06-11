@@ -6,11 +6,11 @@ int main(int argc, char **argv){
 
     string port = "/dev/ttyACM0";
     int baud = 115200;
-    ardu_pilot ardu;
+    ArduPilot ardu;
 
     ros::NodeHandle n;
 
-     ros::Subscriber  tsub = n.subscribe("mav_data",1000,&ardu_pilot::receiverCallBack,&ardu);
+     ros::Subscriber  tsub = n.subscribe("mav_data",1000,&ArduPilot::receiverCallBack,&ardu);
 
     ros::spin();
 
