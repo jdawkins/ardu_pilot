@@ -5,7 +5,7 @@ set(catkin_DIR /opt/ros/groovy/share/catkin/cmake)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS roscpp serial std_msgs sensor_msgs message_generation)
+find_package(catkin REQUIRED COMPONENTS roscpp serial std_msgs sensor_msgs mavlink_msgs)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -19,13 +19,13 @@ find_package(catkin REQUIRED COMPONENTS roscpp serial std_msgs sensor_msgs messa
 #######################################
 
 ## Generate messages in the 'msg' folder
- add_message_files(
-    FILES
-    command.msg
-    Mavlink.msg
+# add_message_files(
+#    FILES
+#    command.msg
+#    Mavlink.msg
 #   Message1.msg
 #   Message2.msg
- )
+# )
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -50,7 +50,7 @@ find_package(catkin REQUIRED COMPONENTS roscpp serial std_msgs sensor_msgs messa
 catkin_package(
    INCLUDE_DIRS include
   LIBRARIES ardu_pilot
-  CATKIN_DEPENDS roscpp serial std_msgs sensor_msgs
+  CATKIN_DEPENDS roscpp serial std_msgs sensor_msgs mavlink_msgs
   DEPENDS system_lib
 )
 
@@ -88,6 +88,8 @@ set(ardu_pilot_SRCS
 ## Add dependencies to the executable
  add_dependencies(ardu_pilot_node ${PROJECT_NAME})
  add_dependencies(ardu_pilot_listener ${PROJECT_NAME})
+ add_dependencies(ardu_pilot_node ardu_pilot_gencpp)
+ add_dependencies(ardu_pilot_listener ardu_pilot_gencpp)
 
 ## Specify libraries to link a library or executable target against
  target_link_libraries(ardu_pilot_node ${catkin_LIBRARIES})

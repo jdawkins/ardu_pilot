@@ -168,7 +168,7 @@ ArduPilot::readData(){
     *     printf("Received message with ID %d, sequence: %d from component %d of system %d", msg.msgid, msg.seq, msg.compid, msg.sysid);
     *     }
     * }*/
-    ardu_pilot::Mavlink ros_mav_msg;
+    mavlink_msgs::Mavlink ros_mav_msg;
     mavlink_message_t msg;
     mavlink_status_t status;
     uint8_t byte;

@@ -10,8 +10,8 @@
 #include "mavlink/v1.0/ardupilotmega/mavlink.h"
 #include "sensor_msgs/Imu.h"
 #include "sensor_msgs/NavSatFix.h"
-//#include "mavlink_msgs/Mavlink.h"
-#include "ardu_pilot/Mavlink.h"
+#include "mavlink_msgs/Mavlink.h"
+//#include "ardu_pilot/Mavlink.h"
 
 #include "ros/ros.h"
 
@@ -20,7 +20,7 @@ using namespace std;
 using namespace boost;
 using namespace ros;
 //using namespace mav_msgs;
-using namespace ardu_pilot;
+using namespace mavlink_msgs;
 
 // MAVLINK MESSAGE ID 24
 /*struct gps_data{
