@@ -4,16 +4,13 @@ int main(int argc, char **argv){
 
     ros::init(argc, argv, "ardu_pilot_node");
 
-    //string port = "/dev/ttyACM0";
-    //int baud = 115200;
-
-   // ardu_pilot ardu(port,baud);
     ros::NodeHandle nh = ros::NodeHandle("~");
+
     ArduPilot* ardu = new ArduPilot(nh);
 
     ardu->connect();
 
-    ros::Rate loop_rate(100);
+    ros::Rate loop_rate(1000);
     while(ros::ok()){
 
         ardu->readData(); // Read new Data from ArduPilot and Write to ROS

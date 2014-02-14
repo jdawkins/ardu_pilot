@@ -11,6 +11,12 @@
 #include "sensor_msgs/Imu.h"
 #include "sensor_msgs/NavSatFix.h"
 #include "mavlink_msgs/Mavlink.h"
+#include "mavlink_msgs/rc_channel.h"
+#include "mavlink_msgs/command.h"
+
+#include <geometry_msgs/Pose.h>
+#include <gps_common/conversions.h>
+
 //#include "ardu_pilot/Mavlink.h"
 
 #include "ros/ros.h"
@@ -20,7 +26,7 @@ using namespace std;
 using namespace boost;
 using namespace ros;
 //using namespace mav_msgs;
-using namespace mavlink_msgs;
+//using namespace mavlink_msgs;
 
 // MAVLINK MESSAGE ID 24
 /*struct gps_data{
@@ -106,19 +112,22 @@ public:
     void readData();
 
 
-    sensor_msgs::Imu ros_imu_msg_;
+
     sensor_msgs::NavSatFix ros_gps_msg_;
     sensor_msgs::NavSatStatus ros_gps_fix_msg_;
-    geometry_msgs::Vector3 ros_ahrs_msg_;
-    geometry_msgs::Vector3 ros_att_msg_;
+    sensor_msgs::Imu ros_imu_msg_;
+    sensor_msgs::Imu ros_ahrs_msg_;
+    sensor_msgs::Imu ros_att_msg_;
+    mavlink_msgs::rc_channel ros_rc_msg_;
+    mavlink_msgs::command ros_cmd_msg_;
 
-
+    geometry_msgs::Pose ros_pose_msg_;
 
 
 
     void getROSParameters();
     void configureROSComms();
-    void receiverCallBack(const Mavlink &mav_msg);
+    void receiverCallBack(const mavlink_msgs::Mavlink &mav_msg);
    // ~ardu_pilot();
 private:
 
@@ -133,20 +142,30 @@ private:
 
     mavlink_status_t last_status_;
 
-
+// Create instance of Ros Node Handle Object
     ros::NodeHandle n_;
+// Create Ros publishers
     ros::Publisher imu_pub_;
     ros::Publisher gps_pub_;
     ros::Publisher ahrs_pub_;
     ros::Publisher att_pub_;
     ros::Publisher mav_pub_;
+    ros::Publisher rc_pub_;
+    ros::Publisher pose_pub_;
+
+//Create Ros Subscribers
     ros::Subscriber mav_sub_;
 
-    bool log_imu_flag_;
-    bool log_gps_flag_;
-    bool log_ahrs_flag_;
-    bool log_att_flag_;
+    double north_;
+    double east_;
+    double down_;
+    std::string utm_zone_;
 
+//    bool log_imu_flag_;
+//    bool log_gps_flag_;
+//    bool log_ahrs_flag_;
+//    bool log_att_flag_;
+    struct timespec current_time_;
 };
 
 
